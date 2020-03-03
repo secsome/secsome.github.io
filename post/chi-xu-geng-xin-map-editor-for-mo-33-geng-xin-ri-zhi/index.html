@@ -4,9 +4,9 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>【持续更新】 Map Editor For MO 3.3 更新日志 | 某书纪の鸽子窝🕊</title>
-<link rel="shortcut icon" href="https://secsome.github.io/favicon.ico?v=1583222540328">
+<link rel="shortcut icon" href="http://localhost:4000/favicon.ico?v=1583223023332">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
-<link rel="stylesheet" href="https://secsome.github.io/styles/main.css">
+<link rel="stylesheet" href="http://localhost:4000/styles/main.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
       integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
@@ -74,7 +74,7 @@
             
                 <div class="nav-item">
                     
-                        <a href="https://secsome.github.io/post/hello-gridea" class="menu gt-a-link">
+                        <a href="http://localhost:4000/post/hello-gridea" class="menu gt-a-link">
                             关于
                         </a>
                     
@@ -149,12 +149,38 @@ FA2Ext.dll：AlexB</p>
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://secsome.github.io/post/yi-dao-shu-xue-ti/" class="post-title gt-a-link">
+                <a href="http://localhost:4000/post/yi-dao-shu-xue-ti/" class="post-title gt-a-link">
                     一道数学题
                 </a>
             </div>
         
 
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '87d91f5cadc67975932b',
+    clientSecret: '8e6e9b6568720ebf5d7f507d8046dcefba8b8c81',
+    repo: 'secsome.github.io',
+    owner: 'secsome',
+    admin: ['secsome'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
         
 
         <div class="site-footer gt-c-content-color-first">
@@ -174,7 +200,7 @@ FA2Ext.dll：AlexB</p>
             
         
     </div>
-    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a href="https://secsome.github.io/atom.xml" target="_blank">RSS</a>
+    Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a href="http://localhost:4000/atom.xml" target="_blank">RSS</a>
 </div>
 
 <script>
