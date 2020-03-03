@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://secsome.github.io</id>
     <title>某书纪の鸽子窝🕊</title>
-    <updated>2020-03-03T07:05:16.159Z</updated>
+    <updated>2020-03-03T07:13:57.026Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://secsome.github.io"/>
     <link rel="self" href="https://secsome.github.io/atom.xml"/>
@@ -11,17 +11,18 @@
     <icon>https://secsome.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 某书纪の鸽子窝🕊</rights>
     <entry>
-        <title type="html"><![CDATA[Hello Gridea!]]></title>
+        <title type="html"><![CDATA[咕咕咕🕊]]></title>
         <id>https://secsome.github.io/post/hello-gridea/</id>
         <link href="https://secsome.github.io/post/hello-gridea/">
         </link>
         <updated>2020-03-03T06:52:30.000Z</updated>
-        <content type="html"><![CDATA[<p>#Markdown title 1<br>
-##Markdown title 2<br>
-###Markdown title 3<br>
-####Markdown title 4<br>
-#####Markdown title 5<br>
-######Markdown title 6</p>
+        <summary type="html"><![CDATA[<p>这个博客当然就是想写什么写什么辣！</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>这个博客当然就是想写什么写什么辣！</p>
+<!-- more -->
+<p><a href="https://space.bilibili.com/143748001">我的B站空间</a><br>
+<a href="https://pan.baidu.com/s/1PmxoPzE_QSxl1LefMBu_Qw">《梦醒时分》系列下载地址(43a2)</a><br>
+<a href="https://pan.baidu.com/s/1eFAHt9k6sRx3-LMik69e7A">FA2复制功能及其它修正(sbwf)</a></p>
 ]]></content>
     </entry>
 </feed>
