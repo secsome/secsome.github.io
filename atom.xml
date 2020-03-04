@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://secsome.github.io</id>
     <title>某书纪の鸽子窝🕊</title>
-    <updated>2020-03-04T05:48:36.704Z</updated>
+    <updated>2020-03-04T09:22:57.553Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://secsome.github.io"/>
     <link rel="self" href="https://secsome.github.io/atom.xml"/>
@@ -135,6 +135,11 @@ M1001 80H400000v40H1017z'/></svg></span></span></span><span class="vlist-s">​<
 FA2Copy.dll：某书纪<br>
 FA2Ext.dll：AlexB</p>
 </blockquote>
+<p>#下载地址</p>
+<blockquote>
+<p><a href="https://pan.baidu.com/s/1eFAHt9k6sRx3-LMik69e7A">百度网盘(sbwf)</a><br>
+<a href="https://share.weiyun.com/5vrWOSB">腾讯微云(gugugu)</a></p>
+</blockquote>
 ]]></summary>
         <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://secsome.github.io/post-images/1583244024722.png" alt="" loading="lazy"></figure>
 <h1 id="组件">组件</h1>
@@ -142,6 +147,11 @@ FA2Ext.dll：AlexB</p>
 <p>FA2增强扩展版：E1 Elite，Caco，prry，某书纪<br>
 FA2Copy.dll：某书纪<br>
 FA2Ext.dll：AlexB</p>
+</blockquote>
+<p>#下载地址</p>
+<blockquote>
+<p><a href="https://pan.baidu.com/s/1eFAHt9k6sRx3-LMik69e7A">百度网盘(sbwf)</a><br>
+<a href="https://share.weiyun.com/5vrWOSB">腾讯微云(gugugu)</a></p>
 </blockquote>
 <!-- more -->
 <p>##版本005（待开发）</p>
@@ -245,18 +255,18 @@ FA2Ext.dll：AlexB</p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[咕咕咕🕊]]></title>
-        <id>https://secsome.github.io/post/hello-gridea/</id>
-        <link href="https://secsome.github.io/post/hello-gridea/">
+        <title type="html"><![CDATA[我の网址导航]]></title>
+        <id>https://secsome.github.io/post/guide/</id>
+        <link href="https://secsome.github.io/post/guide/">
         </link>
         <updated>2020-03-03T06:52:30.000Z</updated>
-        <summary type="html"><![CDATA[<p>这个博客当然就是想写什么写什么辣！</p>
+        <summary type="html"><![CDATA[<p>一些跳转的链接哒！</p>
 ]]></summary>
-        <content type="html"><![CDATA[<p>这个博客当然就是想写什么写什么辣！</p>
+        <content type="html"><![CDATA[<p>一些跳转的链接哒！</p>
 <!-- more -->
 <p><a href="https://space.bilibili.com/143748001">我的B站空间</a><br>
 <a href="https://pan.baidu.com/s/1PmxoPzE_QSxl1LefMBu_Qw">《梦醒时分》系列下载地址(43a2)</a><br>
-<a href="https://pan.baidu.com/s/1eFAHt9k6sRx3-LMik69e7A">FA2复制功能及其它修正(sbwf)</a></p>
+<a href="https://secsome.github.io/post/chi-xu-geng-xin-map-editor-for-mo-33-geng-xin-ri-zhi/">MO3.3地图编辑器修订</a></p>
 ]]></content>
     </entry>
 </feed>
