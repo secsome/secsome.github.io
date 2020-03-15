@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://secsome.github.io</id>
     <title>某书纪の鸽子窝🕊</title>
-    <updated>2020-03-15T11:30:34.055Z</updated>
+    <updated>2020-03-15T12:24:31.114Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://secsome.github.io"/>
     <link rel="self" href="https://secsome.github.io/atom.xml"/>
@@ -1537,7 +1537,8 @@ s-65,47,-65,47z M834 80H400000v40H845z'/></svg></span></span></span><span class=
 35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429c69,-144,104.5,-217.7,106.5,
 -221c5.3,-9.3,12,-14,20,-14H400000v40H845.2724s-225.272,467,-225.272,467
 s-235,486,-235,486c-2.7,4.7,-9,7,-19,7c-6,0,-10,-1,-12,-3s-194,-422,-194,-422
-s-65,47,-65,47z M834 80H400000v40H845z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.13278em;"><span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">3</span><span class="mclose">]</span><span class="mord">.</span></span></span></span></p>
+s-65,47,-65,47z M834 80H400000v40H845z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.13278em;"><span></span></span></span></span></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">3</span><span class="mclose">]</span><span class="mord">.</span></span></span></span><br>
+(<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>P</mi><mi mathvariant="normal">.</mi><mi>S</mi></mrow><annotation encoding="application/x-tex">P.S</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mord">.</span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span></span></span></span>：有一说一这个参数方程解法真的帅)</p>
 <hr>
 <h1 id="14三角函数公式总结">14.三角函数公式总结</h1>
 <p>解答三角函数题应从三方面入手：<strong>角</strong><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">,</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3em;vertical-align:-0.19444em;"></span><span class="mpunct">,</span></span></span></span><strong>名称</strong><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">,</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3em;vertical-align:-0.19444em;"></span><span class="mpunct">,</span></span></span></span><strong>结构式</strong><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.10556em;vertical-align:0em;"></span><span class="mord">.</span></span></span></span></p>
@@ -1674,6 +1675,7 @@ Q_n=\sqrt{\dfrac{\sum\limits_{i=1}^n x^2_i}{n}}
 <p><a href="https://secsome.github.io/post/00008">柯西不等式</a></p>
 <hr>
 <h1 id="17二次曲线">17.二次曲线</h1>
+<p>总结一些与二次曲线有关的通用二级结论<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.10556em;vertical-align:0em;"></span><span class="mord">.</span></span></span></span></p>
 <h2 id="判断二次曲线的类型">判断二次曲线的类型</h2>
 <p>一般地<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">,</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3em;vertical-align:-0.19444em;"></span><span class="mpunct">,</span></span></span></span>对于曲线</p>
 <p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>F</mi><mo>(</mo><mi>x</mi><mo separator="true">,</mo><mi>y</mi><mo>)</mo><mo>=</mo><mi>A</mi><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi>B</mi><mi>x</mi><mi>y</mi><mo>+</mo><mi>C</mi><msup><mi>y</mi><mn>2</mn></msup><mo>+</mo><mi>D</mi><mi>x</mi><mo>+</mo><mi>E</mi><mi>y</mi><mo>+</mo><mi>F</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">F(x,y)=Ax^2+Bxy+Cy^2+Dx+Ey+F=0
