@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://secsome.github.io</id>
     <title>某书纪の鸽子窝🕊</title>
-    <updated>2020-03-17T00:24:41.847Z</updated>
+    <updated>2020-03-17T11:47:23.174Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://secsome.github.io"/>
     <link rel="self" href="https://secsome.github.io/atom.xml"/>
@@ -1916,22 +1916,19 @@ FA2Ext.dll：AlexB</p>
 <!-- more -->
 <h2 id="版本006">版本006</h2>
 <blockquote>
-<p>更新时间：2020/3/<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>S</mi><mi>O</mi><mi>O</mi><msup><mi>N</mi><mrow><mi>T</mi><mi>M</mi></mrow></msup></mrow><annotation encoding="application/x-tex">SOON^{TM}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8413309999999999em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span><span class="mord mathdefault mtight" style="margin-right:0.10903em;">M</span></span></span></span></span></span></span></span></span></span></span></span><br>
-➕ 等待<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>A</mi><mi>l</mi><mi>e</mi><mi>x</mi><mi>B</mi></mrow><annotation encoding="application/x-tex">AlexB</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">A</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord mathdefault">x</span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span></span></span></span>进行修正の中文<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>c</mi><mi>s</mi><mi>f</mi></mrow><annotation encoding="application/x-tex">csf</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">c</span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span></span></span></span>问题...<br>
-<img src="https://secsome.github.io/post-images/1583416425242.jpg" alt="" loading="lazy"></p>
+<p>更新时间：2020/3/<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>S</mi><mi>O</mi><mi>O</mi><msup><mi>N</mi><mrow><mi>T</mi><mi>M</mi></mrow></msup></mrow><annotation encoding="application/x-tex">SOON^{TM}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8413309999999999em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span><span class="mord mathdefault mtight" style="margin-right:0.10903em;">M</span></span></span></span></span></span></span></span></span></span></span></span></p>
 </blockquote>
+<p>➕ 可以自定义地形分类了<br>
+➕ 脚本可以添加与使用自定义模板了<br>
+✳   部分触发条件/行为的中文<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>C</mi><mi>S</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CSF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.13889em;">F</span></span></span></span>现在可以正常读取了<br>
+✳   重新加入了退出提示框</p>
 <h2 id="版本005">版本005</h2>
 <blockquote>
 <p>更新时间：2020/3/13</p>
 </blockquote>
 <p>➕ 小队可以添加与使用自定义模板了<br>
+✳   新建<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>I</mi><mi>N</mi><mi>I</mi></mrow><annotation encoding="application/x-tex">INI</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span></span></span></span>小节时应该会自动跳转了<br>
 ✳   修正了一下建筑列表</p>
-<h2 id="版本0045">版本004.5</h2>
-<blockquote>
-<p>更新时间：2020/3/5</p>
-</blockquote>
-<p>✳   复制触发现在可以正确地复制重复类型了<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>×</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\times 2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">×</span><span class="mord">2</span></span></span></span><br>
-<s>我自裁罢</s></p>
 <h2 id="版本004">版本004</h2>
 <blockquote>
 <p>更新时间：2020/3/5</p>
