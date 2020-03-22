@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://secsome.github.io</id>
     <title>某书纪の鸽子窝🕊</title>
-    <updated>2020-03-18T09:59:32.451Z</updated>
+    <updated>2020-03-22T13:27:47.780Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://secsome.github.io"/>
     <link rel="self" href="https://secsome.github.io/atom.xml"/>
@@ -12,8 +12,8 @@
     <rights>All rights reserved 2020, 某书纪の鸽子窝🕊</rights>
     <entry>
         <title type="html"><![CDATA[某位同学给我的递推问题]]></title>
-        <id>https://secsome.github.io/post/V5gOUS1Nr/</id>
-        <link href="https://secsome.github.io/post/V5gOUS1Nr/">
+        <id>https://secsome.github.io/post/00009/</id>
+        <link href="https://secsome.github.io/post/00009/">
         </link>
         <updated>2020-03-16T23:55:06.000Z</updated>
         <summary type="html"><![CDATA[<p>感谢班上某一位<strong>真无敌</strong>的同学<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo separator="true">,</mo></mrow><annotation encoding="application/x-tex">,</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.3em;vertical-align:-0.19444em;"></span><span class="mpunct">,</span></span></span></span>让我想起了这一道<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mi>I</mi></mrow><annotation encoding="application/x-tex">OI</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span></span></span></span>时期搞过的题目<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">.</mi></mrow><annotation encoding="application/x-tex">.</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.10556em;vertical-align:0em;"></span><span class="mord">.</span></span></span></span></p>
@@ -1914,11 +1914,19 @@ FA2Ext.dll：AlexB</p>
 <a href="https://share.weiyun.com/5vrWOSB">腾讯微云(gugugu)</a></p>
 </blockquote>
 <!-- more -->
-<h2 id="版本007">版本007</h2>
+<h2 id="版本10">版本1.0</h2>
 <blockquote>
 <p>更新时间：2020/3/<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>S</mi><mi>O</mi><mi>O</mi><msup><mi>N</mi><mrow><mi>T</mi><mi>M</mi></mrow></msup></mrow><annotation encoding="application/x-tex">SOON^{TM}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8413309999999999em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413309999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span><span class="mord mathdefault mtight" style="margin-right:0.10903em;">M</span></span></span></span></span></span></span></span></span></span></span></span></p>
 </blockquote>
-<p>✳   部分触发条件/行为的中文<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>C</mi><mi>S</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CSF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.13889em;">F</span></span></span></span>现在可以正常读取了</p>
+<p>✳   部分触发条件/行为的中文<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>C</mi><mi>S</mi><mi>F</mi></mrow><annotation encoding="application/x-tex">CSF</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mord mathdefault" style="margin-right:0.13889em;">F</span></span></span></span>现在可以正常读取了<br>
+✳   重新汉化了脚本参数</p>
+<h2 id="版本007">版本007</h2>
+<blockquote>
+<p>更新时间：2020/3/22</p>
+</blockquote>
+<p>➕ 新增了没什么用的logger<br>
+✳   修复了打开CFileDialog类后无法正确定位文件的问题<br>
+✳   调整了工程结构</p>
 <h2 id="版本006">版本006</h2>
 <blockquote>
 <p>更新时间：2020/3/19</p>
