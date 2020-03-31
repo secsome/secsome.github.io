@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://secsome.github.io</id>
     <title>某书纪の鸽子窝🕊</title>
-    <updated>2020-03-23T23:43:06.564Z</updated>
+    <updated>2020-03-31T09:05:49.767Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://secsome.github.io"/>
     <link rel="self" href="https://secsome.github.io/atom.xml"/>
@@ -10,6 +10,266 @@
     <logo>https://secsome.github.io/images/avatar.png</logo>
     <icon>https://secsome.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 某书纪の鸽子窝🕊</rights>
+    <entry>
+        <title type="html"><![CDATA[[编程] 为进程添加Win32对话框]]></title>
+        <id>https://secsome.github.io/post/00011/</id>
+        <link href="https://secsome.github.io/post/00011/">
+        </link>
+        <updated>2020-03-31T07:03:43.000Z</updated>
+        <summary type="html"><![CDATA[<p>近日在为FinalAlert 2开发拓展组件的时候需要添加一个新的对话框并实现特定功能，仔细研究后还是做到了。其中有一些小技巧值得记录。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>近日在为FinalAlert 2开发拓展组件的时候需要添加一个新的对话框并实现特定功能，仔细研究后还是做到了。其中有一些小技巧值得记录。</p>
+<!-- more -->
+<h2 id="需求">需求</h2>
+<p><img src="https://secsome.github.io/post-images/1585641586553.png" alt="" loading="lazy"><br>
+如图，我已经通过Resource Hacker为其添加了一个Button控件，ID为9973，经确认在该窗口不会冲突。现在对于所有的所属方，部分已经结盟的所属方在下方的Edit中已经用逗号隔开。我要实现的是将其转化为一个独立的对话框来方便编辑下面的一长串。<br>
+由于不涉及内存上的Hook，只能通过进行WinAPI来完成操作。</p>
+<h2 id="实现">实现</h2>
+<p>首先我给FA2挂了一个钩子来获取WM_COMMAND消息，然后成功的通过控件ID来进行判断按钮是否被按下。</p>
+<pre><code class="language-cpp">...
+if (nCode &gt;= 0)
+	{
+		CWPSTRUCT* cwps = (CWPSTRUCT*)lParam;
+		if (cwps-&gt;message == WM_COMMAND)
+		{
+			INT wmId = LOWORD(cwps-&gt;wParam);
+			INT wmHi = HIWORD(cwps-&gt;wParam);
+			switch (wmId)
+			{
+                case 9973:{
+                        //要进行的操作
+                }
+            }
+            ...
+        }
+        ...
+    }
+...
+</code></pre>
+<p>首先用FindWindow确定所属方这个窗口，然后通过GetDlgItem获得“当前所属方ComboBox”与“盟友Edit”这两个控件的句柄，接下来就是遍历ComboBox获取当前所有的所属方，存储到unordered_map中：</p>
+<pre><code class="language-cpp">HWND ComboBox, Edit;
+ComboBox = GetDlgItem(HouseWnd, 1091);
+Edit = GetDlgItem(HouseWnd, 1099);
+
+int HouseCount = SendMessage(ComboBox, CB_GETCOUNT, NULL, NULL);
+int CurHouseIndex = SendMessage(ComboBox, CB_GETCURSEL, NULL, NULL);
+TCHAR str[256];
+GetWindowText(ComboBox, str, 256);
+std::string CurHouseStr = str;
+g_ini.Trim(CurHouseStr);
+
+std::unordered_map&lt;std::string, bool&gt; Houses;
+for (register int i = 0; i &lt; HouseCount; ++i) {
+    SendMessage(ComboBox, CB_SETCURSEL, i, NULL);
+    GetWindowText(ComboBox, str, 256);
+    std::string key = str;
+    Houses[key] = false;
+}
+SendMessage(ComboBox, CB_SETCURSEL, HouseCount &gt;= 0 ? CurHouseIndex : -1, NULL);
+TCHAR AllieStr[1024];
+GetWindowText(Edit, AllieStr, 1024);
+</code></pre>
+<p>接下来判断是否为盟友：</p>
+<pre><code class="language-cpp">std::string AlliedText = AllieStr;
+
+std::vector&lt;std::string&gt; AllieStrs = g_ini.Split(AllieStr, ',');
+for (register int i = 0, cnt = AllieStrs.size(); i &lt; cnt; ++i) {
+    g_ini.Trim(AllieStrs[i]);
+    if (Houses.find(AllieStrs[i]) != Houses.end()) //House Exists
+    Houses[AllieStrs[i]] = true;
+}
+</code></pre>
+<p>然后我去新建了一个对话框的资源<br>
+<img src="https://secsome.github.io/post-images/1585643402485.png" alt="" loading="lazy"></p>
+<p>下面问题就来了：我该如何将参数传入这个对话框呢？<br>
+我一开始的想法是利用一个全局变量，然后使用DialogBox创建，但是不小心按到了F12：<br>
+<img src="https://secsome.github.io/post-images/1585643603251.png" alt="" loading="lazy"><br>
+因此我将目光转向了DIalogBoxParam上面，其定义如下：<br>
+<img src="https://secsome.github.io/post-images/1585643663222.png" alt="" loading="lazy"><br>
+可以看出它有一个LPARAM参数，可供我们进行传入参数，并用这个参数对Dialog进行初始化。<br>
+我们知道LPARAM就是一个<strong>指针</strong>，因此想用它直接传递我们的unordered_map和一些附加参数是不可能的。<br>
+但我们重新思考一遍，我们传入的参数可以在Dialog内部被调用，并且能返回到原来的值上面。因此可以使用一个结构体包装我们需要传入的数据的指针，在传入参数时传递这个结构体的地址即可。以下是我的实现，由于传入的参数比较简单就做了个套娃：<br>
+<img src="https://secsome.github.io/post-images/1585644019935.png" alt="" loading="lazy"><br>
+然后就可以在WM_INITDIALOG消息的处理中愉快地使用我们传入的参数进行处理了！<br>
+但是这个传入参数也仅仅只能在WM_INITDIALOG中使用，为了在后续处理中仍然可以使用，我建立了一个不可视的Edit2控件来保存我需要的指针：</p>
+<pre><code class="language-cpp">EDIT2 = GetDlgItem(hwnd, IDC_EDIT2);//String Address
+SetWindowText(EDIT2, std::to_string((int)(StringParam-&gt;first)).c_str());
+</code></pre>
+<p>在之后的调用中是这样取出指针的：</p>
+<pre><code class="language-cpp">GetWindowText(EDIT2, str, 11);
+std::string* retStr = (std::string*)(atoi(str));
+</code></pre>
+<p>至此，处理程序圆满完成。接下来只要简单地实现功能就行了。</p>
+<pre><code class="language-cpp">...
+case 9973: {//Allies Manager
+    HWND HouseWnd = FindWindow(
+        g_FindWindowConfig.DialogClass.c_str(),
+        g_FindWindowConfig.HouseWnd.c_str()
+    );
+    if (HouseWnd == NULL) {
+        g_logger.Error(&quot;Cannot locate the House window.&quot;);
+        MessageBox(
+            NULL,
+            g_MessageBoxConfig.Message.HouseWndNotFound.c_str(),
+            g_MessageBoxConfig.Captain.Error.c_str(),
+            MB_OK
+        );
+        break;
+    }
+    g_logger.Info(&quot;Successfully located the House window.&quot;);
+
+    HWND ComboBox, Edit;
+    ComboBox = GetDlgItem(HouseWnd, 1091);
+    Edit = GetDlgItem(HouseWnd, 1099);
+
+    int HouseCount = SendMessage(ComboBox, CB_GETCOUNT, NULL, NULL);
+    int CurHouseIndex = SendMessage(ComboBox, CB_GETCURSEL, NULL, NULL);
+    TCHAR str[256];
+    GetWindowText(ComboBox, str, 256);
+    std::string CurHouseStr = str;
+    g_ini.Trim(CurHouseStr);
+
+    std::unordered_map&lt;std::string, bool&gt; Houses;
+    for (register int i = 0; i &lt; HouseCount; ++i) {
+        SendMessage(ComboBox, CB_SETCURSEL, i, NULL);
+        GetWindowText(ComboBox, str, 256);
+        std::string key = str;
+        Houses[key] = false;
+    }
+    SendMessage(ComboBox, CB_SETCURSEL, HouseCount &gt;= 0 ? CurHouseIndex : -1, NULL);
+    TCHAR AllieStr[1024];
+    GetWindowText(Edit, AllieStr, 1024);
+    std::string AlliedText = AllieStr;
+
+    std::vector&lt;std::string&gt; AllieStrs = g_ini.Split(AllieStr, ',');
+    for (register int i = 0, cnt = AllieStrs.size(); i &lt; cnt; ++i) {
+        g_ini.Trim(AllieStrs[i]);
+        if (Houses.find(AllieStrs[i]) != Houses.end()) //House Exists
+            Houses[AllieStrs[i]] = true;
+    }
+				
+    std::pair&lt;std::unordered_map&lt;std::string, bool&gt;*, std::pair&lt;std::string*, std::string*&gt;*&gt; Param;
+    std::pair&lt;std::string*, std::string*&gt; StringParam = std::make_pair(&amp;AlliedText, &amp;CurHouseStr);
+				
+    Param.first = &amp;Houses;
+    Param.second = &amp;StringParam;
+
+    DialogBoxParam(g_hModule, MAKEINTRESOURCE(IDD_DIALOG1), HouseWnd, HouseDlgProc, (LPARAM)&amp;Param);
+				
+    SetWindowText(Edit, AlliedText.c_str());
+
+    break;
+}
+...
+</code></pre>
+<pre><code class="language-cpp">BOOL CALLBACK HouseDlgProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (Msg)
+	{
+        case WM_INITDIALOG:{
+            std::unordered_map&lt;std::string, bool&gt;* Houses = 
+                ((std::pair&lt;std::unordered_map&lt;std::string, bool&gt;*, std::pair&lt;std::string*, std::string*&gt;*&gt;*)lParam)-&gt;first;
+            std::pair&lt;std::string*, std::string*&gt;* StringParam =
+                ((std::pair&lt;std::unordered_map&lt;std::string, bool&gt;*, std::pair&lt;std::string*, std::string*&gt;*&gt;*)lParam)-&gt;second;
+
+            HWND LBA, LBB, EDIT, EDIT2;
+            LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+            LBB = GetDlgItem(hwnd, IDC_LIST3);//Enemy ListBox
+            EDIT = GetDlgItem(hwnd, IDC_EDIT1);//Edit
+            EDIT2 = GetDlgItem(hwnd, IDC_EDIT2);//String Address
+            for (auto x : (*Houses)) {
+                std::string str = x.first;
+                if (x.second)
+                    SendMessage(LBA, LB_ADDSTRING, NULL, (LPARAM)str.c_str());
+                else
+                    SendMessage(LBB, LB_ADDSTRING, NULL, (LPARAM)str.c_str());
+            }
+
+            SetWindowText(EDIT2, std::to_string((int)(StringParam-&gt;first)).c_str());
+            std::string &amp;EditShowStr = *(StringParam-&gt;second);
+            g_logger.Info(&quot;Now processing house &quot; + EditShowStr);
+            SetWindowText(EDIT, EditShowStr.c_str());
+            g_logger.Info(&quot;Successfully done initialization of allie editor dialog box.&quot;);
+            return TRUE;
+        }
+        case WM_COMMAND:{
+            switch (wParam)
+            {
+                case IDOK:{
+                    g_logger.Info(&quot;Allie editor confirmed.&quot;);
+                    HWND LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+                    HWND EDIT2 = GetDlgItem(hwnd, IDC_EDIT2);//Allies ListBox
+                    TCHAR str[256];
+                    GetWindowText(EDIT2, str, 11);
+                    std::string* retStr = (std::string*)(atoi(str));
+                    retStr-&gt;clear();
+                    int AllieCount = SendMessage(LBA, LB_GETCOUNT, NULL, NULL);
+                    for (register int i = 0; i &lt; AllieCount - 1; ++i) {
+                        int TextLen = SendMessage(LBA, LB_GETTEXTLEN, i, NULL);
+                        if (TextLen == LB_ERR)	break;
+                        TCHAR* str = new TCHAR[TextLen + 1];
+                        SendMessage(LBA, LB_GETTEXT, i, (LPARAM)str);
+                        (*retStr) += ((std::string)str + ',');
+                    }
+                    int TextLen = SendMessage(LBA, LB_GETTEXTLEN, AllieCount - 1, NULL);
+                    if (TextLen == LB_ERR)	break;
+                    TCHAR* _str = new TCHAR[TextLen + 1];
+                    SendMessage(LBA, LB_GETTEXT, AllieCount - 1, (LPARAM)_str);
+                    (*retStr) += (std::string)_str;
+                    EndDialog(hwnd, NULL);
+                    return TRUE;
+                }
+                case IDCANCEL: {
+                    g_logger.Info(&quot;Allie editor cancelled.&quot;);
+                    EndDialog(hwnd, NULL);
+                    return TRUE;
+                }
+                case IDC_BUTTON1: {//Go Allies
+                    HWND LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+                    HWND LBB = GetDlgItem(hwnd, IDC_LIST3);//Enemy ListBox
+                    int EnemyCount = SendMessage(LBB, LB_GETCOUNT, NULL, NULL);
+                    if (EnemyCount &lt;= 0)	break;
+                    int EnemyCurSelIndex = SendMessage(LBB, LB_GETCURSEL, NULL, NULL);
+                    if (EnemyCurSelIndex &lt; 0 || EnemyCurSelIndex &gt;= EnemyCount)	break;
+                    int TextLen = SendMessage(LBB, LB_GETTEXTLEN, EnemyCurSelIndex, NULL);
+                    if (TextLen == LB_ERR)	break;
+                    TCHAR* str = new TCHAR[TextLen + 1];
+                    SendMessage(LBB, LB_GETTEXT, EnemyCurSelIndex, (LPARAM)str);
+                    SendMessage(LBB, LB_DELETESTRING, EnemyCurSelIndex, NULL);
+                    SendMessage(LBA, LB_ADDSTRING, NULL, (LPARAM)str);
+                    break;
+                }
+                case IDC_BUTTON2: {//Go Enemies
+                    HWND LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+                    HWND LBB = GetDlgItem(hwnd, IDC_LIST3);//Enemy ListBox
+                    int AllieCount = SendMessage(LBA, LB_GETCOUNT, NULL, NULL);
+                    if (AllieCount &lt;= 0)	break;
+                    int AllieCurSelIndex = SendMessage(LBA, LB_GETCURSEL, NULL, NULL);
+                    if (AllieCurSelIndex &lt; 0 || AllieCurSelIndex &gt;= AllieCount)	break;
+                    int TextLen = SendMessage(LBA, LB_GETTEXTLEN, AllieCurSelIndex, NULL);
+                    if (TextLen == LB_ERR)	break;
+                    TCHAR* str = new TCHAR[TextLen + 1];
+                    SendMessage(LBA, LB_GETTEXT, AllieCurSelIndex, (LPARAM)str);
+                    SendMessage(LBA, LB_DELETESTRING, AllieCurSelIndex, NULL);
+                    SendMessage(LBB, LB_ADDSTRING, NULL, (LPARAM)str);
+                    break;
+                }
+                default:
+                    break; 
+            }
+            break;
+        }
+
+        case WM_CLOSE:{
+            EndDialog(hwnd, NULL);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[[数学] 构造]]></title>
         <id>https://secsome.github.io/post/00010/</id>
@@ -2068,21 +2328,6 @@ FA2Ext.dll：AlexB</p>
 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∴</mo><msub><mi>x</mi><mn>1</mn></msub><mo>⩽</mo><msubsup><mi>x</mi><mn>1</mn><mo mathvariant="normal">′</mo></msubsup><mo>&lt;</mo><msubsup><mi>x</mi><mn>2</mn><mo mathvariant="normal">′</mo></msubsup><mo>⩽</mo><msub><mi>x</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\therefore x_1\leqslant x^\prime_1 &lt; x^\prime_2 \leqslant x_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∴</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.78667em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel amsrm">⩽</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.24810799999999997em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-2.4518920000000004em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">′</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24810799999999997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.24810799999999997em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-2.4518920000000004em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">′</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24810799999999997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel amsrm">⩽</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.58056em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>.<br>
 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>∴</mo><mi>L</mi><mi>H</mi><mi>S</mi><mo>=</mo><mrow><mo fence="true">∣</mo><msub><mi>x</mi><mn>1</mn></msub><mo>−</mo><msub><mi>x</mi><mn>2</mn></msub><mo fence="true">∣</mo></mrow><mo>=</mo><msub><mi>x</mi><mn>2</mn></msub><mo>−</mo><msub><mi>x</mi><mn>1</mn></msub><mo>⩾</mo><msubsup><mi>x</mi><mn>2</mn><mo mathvariant="normal">′</mo></msubsup><mo>−</mo><msubsup><mi>x</mi><mn>1</mn><mo mathvariant="normal">′</mo></msubsup><mo>=</mo><mn>1</mn><mo>+</mo><mfrac><mrow><mi>b</mi><mo>+</mo><mi>e</mi><mo>+</mo><mn>1</mn></mrow><mrow><mn>3</mn><mi>e</mi><mo>−</mo><mn>1</mn></mrow></mfrac><mo>+</mo><mfrac><mrow><mi>e</mi><mi>b</mi></mrow><mrow><mi>e</mi><mo>−</mo><mn>1</mn></mrow></mfrac><mo>=</mo><mi>R</mi><mi>H</mi><mi>S</mi></mrow><annotation encoding="application/x-tex">\therefore LHS=\left|x_1-x_2\right|=x_2-x_1\geqslant x^\prime_2-x^\prime_1=1+\dfrac{b+e+1}{3e-1}+\dfrac{eb}{e-1}=RHS</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69224em;vertical-align:0em;"></span><span class="mrel amsrm">∴</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault">L</span><span class="mord mathdefault" style="margin-right:0.08125em;">H</span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">∣</span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose delimcenter" style="top:0em;">∣</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.73333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.78667em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel amsrm">⩾</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.24810799999999997em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-2.4518920000000004em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">′</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24810799999999997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.24810799999999997em;"></span><span class="mord"><span class="mord mathdefault">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-2.4518920000000004em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">′</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24810799999999997em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:2.14077em;vertical-align:-0.7693300000000001em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">3</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693300000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:2.14077em;vertical-align:-0.7693300000000001em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.37144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault">e</span><span class="mord mathdefault">b</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693300000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.00773em;">R</span><span class="mord mathdefault" style="margin-right:0.08125em;">H</span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span></span></span></span>.<br>
 原命题得证.</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[我の网址导航]]></title>
-        <id>https://secsome.github.io/post/guide/</id>
-        <link href="https://secsome.github.io/post/guide/">
-        </link>
-        <updated>2020-03-03T06:52:30.000Z</updated>
-        <summary type="html"><![CDATA[<p>一些跳转的链接哒！</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>一些跳转的链接哒！</p>
-<!-- more -->
-<p><a href="https://space.bilibili.com/143748001">我的B站空间</a><br>
-<a href="https://pan.baidu.com/s/1PmxoPzE_QSxl1LefMBu_Qw">《梦醒时分》系列下载地址(43a2)</a><br>
-<a href="https://secsome.github.io/post/chi-xu-geng-xin-map-editor-for-mo-33-geng-xin-ri-zhi/">MO3.3地图编辑器修订</a></p>
 ]]></content>
     </entry>
 </feed>

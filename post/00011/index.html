@@ -1,0 +1,419 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>[编程] 为进程添加Win32对话框 | 某书纪の鸽子窝🕊</title>
+<link rel="shortcut icon" href="https://secsome.github.io/favicon.ico?v=1585645547299">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://secsome.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<script src="media/scripts/index.js"></script>
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            某书纪の鸽子窝🕊
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://secsome.github.io/post/hello-gridea" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    [编程] 为进程添加Win32对话框
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-03-31 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>近日在为FinalAlert 2开发拓展组件的时候需要添加一个新的对话框并实现特定功能，仔细研究后还是做到了。其中有一些小技巧值得记录。</p>
+<!-- more -->
+<h2 id="需求">需求</h2>
+<p><img src="https://secsome.github.io/post-images/1585641586553.png" alt="" loading="lazy"><br>
+如图，我已经通过Resource Hacker为其添加了一个Button控件，ID为9973，经确认在该窗口不会冲突。现在对于所有的所属方，部分已经结盟的所属方在下方的Edit中已经用逗号隔开。我要实现的是将其转化为一个独立的对话框来方便编辑下面的一长串。<br>
+由于不涉及内存上的Hook，只能通过进行WinAPI来完成操作。</p>
+<h2 id="实现">实现</h2>
+<p>首先我给FA2挂了一个钩子来获取WM_COMMAND消息，然后成功的通过控件ID来进行判断按钮是否被按下。</p>
+<pre><code class="language-cpp">...
+if (nCode &gt;= 0)
+	{
+		CWPSTRUCT* cwps = (CWPSTRUCT*)lParam;
+		if (cwps-&gt;message == WM_COMMAND)
+		{
+			INT wmId = LOWORD(cwps-&gt;wParam);
+			INT wmHi = HIWORD(cwps-&gt;wParam);
+			switch (wmId)
+			{
+                case 9973:{
+                        //要进行的操作
+                }
+            }
+            ...
+        }
+        ...
+    }
+...
+</code></pre>
+<p>首先用FindWindow确定所属方这个窗口，然后通过GetDlgItem获得“当前所属方ComboBox”与“盟友Edit”这两个控件的句柄，接下来就是遍历ComboBox获取当前所有的所属方，存储到unordered_map中：</p>
+<pre><code class="language-cpp">HWND ComboBox, Edit;
+ComboBox = GetDlgItem(HouseWnd, 1091);
+Edit = GetDlgItem(HouseWnd, 1099);
+
+int HouseCount = SendMessage(ComboBox, CB_GETCOUNT, NULL, NULL);
+int CurHouseIndex = SendMessage(ComboBox, CB_GETCURSEL, NULL, NULL);
+TCHAR str[256];
+GetWindowText(ComboBox, str, 256);
+std::string CurHouseStr = str;
+g_ini.Trim(CurHouseStr);
+
+std::unordered_map&lt;std::string, bool&gt; Houses;
+for (register int i = 0; i &lt; HouseCount; ++i) {
+    SendMessage(ComboBox, CB_SETCURSEL, i, NULL);
+    GetWindowText(ComboBox, str, 256);
+    std::string key = str;
+    Houses[key] = false;
+}
+SendMessage(ComboBox, CB_SETCURSEL, HouseCount &gt;= 0 ? CurHouseIndex : -1, NULL);
+TCHAR AllieStr[1024];
+GetWindowText(Edit, AllieStr, 1024);
+</code></pre>
+<p>接下来判断是否为盟友：</p>
+<pre><code class="language-cpp">std::string AlliedText = AllieStr;
+
+std::vector&lt;std::string&gt; AllieStrs = g_ini.Split(AllieStr, ',');
+for (register int i = 0, cnt = AllieStrs.size(); i &lt; cnt; ++i) {
+    g_ini.Trim(AllieStrs[i]);
+    if (Houses.find(AllieStrs[i]) != Houses.end()) //House Exists
+    Houses[AllieStrs[i]] = true;
+}
+</code></pre>
+<p>然后我去新建了一个对话框的资源<br>
+<img src="https://secsome.github.io/post-images/1585643402485.png" alt="" loading="lazy"></p>
+<p>下面问题就来了：我该如何将参数传入这个对话框呢？<br>
+我一开始的想法是利用一个全局变量，然后使用DialogBox创建，但是不小心按到了F12：<br>
+<img src="https://secsome.github.io/post-images/1585643603251.png" alt="" loading="lazy"><br>
+因此我将目光转向了DIalogBoxParam上面，其定义如下：<br>
+<img src="https://secsome.github.io/post-images/1585643663222.png" alt="" loading="lazy"><br>
+可以看出它有一个LPARAM参数，可供我们进行传入参数，并用这个参数对Dialog进行初始化。<br>
+我们知道LPARAM就是一个<strong>指针</strong>，因此想用它直接传递我们的unordered_map和一些附加参数是不可能的。<br>
+但我们重新思考一遍，我们传入的参数可以在Dialog内部被调用，并且能返回到原来的值上面。因此可以使用一个结构体包装我们需要传入的数据的指针，在传入参数时传递这个结构体的地址即可。以下是我的实现，由于传入的参数比较简单就做了个套娃：<br>
+<img src="https://secsome.github.io/post-images/1585644019935.png" alt="" loading="lazy"><br>
+然后就可以在WM_INITDIALOG消息的处理中愉快地使用我们传入的参数进行处理了！<br>
+但是这个传入参数也仅仅只能在WM_INITDIALOG中使用，为了在后续处理中仍然可以使用，我建立了一个不可视的Edit2控件来保存我需要的指针：</p>
+<pre><code class="language-cpp">EDIT2 = GetDlgItem(hwnd, IDC_EDIT2);//String Address
+SetWindowText(EDIT2, std::to_string((int)(StringParam-&gt;first)).c_str());
+</code></pre>
+<p>在之后的调用中是这样取出指针的：</p>
+<pre><code class="language-cpp">GetWindowText(EDIT2, str, 11);
+std::string* retStr = (std::string*)(atoi(str));
+</code></pre>
+<p>至此，处理程序圆满完成。接下来只要简单地实现功能就行了。</p>
+<pre><code class="language-cpp">...
+case 9973: {//Allies Manager
+    HWND HouseWnd = FindWindow(
+        g_FindWindowConfig.DialogClass.c_str(),
+        g_FindWindowConfig.HouseWnd.c_str()
+    );
+    if (HouseWnd == NULL) {
+        g_logger.Error(&quot;Cannot locate the House window.&quot;);
+        MessageBox(
+            NULL,
+            g_MessageBoxConfig.Message.HouseWndNotFound.c_str(),
+            g_MessageBoxConfig.Captain.Error.c_str(),
+            MB_OK
+        );
+        break;
+    }
+    g_logger.Info(&quot;Successfully located the House window.&quot;);
+
+    HWND ComboBox, Edit;
+    ComboBox = GetDlgItem(HouseWnd, 1091);
+    Edit = GetDlgItem(HouseWnd, 1099);
+
+    int HouseCount = SendMessage(ComboBox, CB_GETCOUNT, NULL, NULL);
+    int CurHouseIndex = SendMessage(ComboBox, CB_GETCURSEL, NULL, NULL);
+    TCHAR str[256];
+    GetWindowText(ComboBox, str, 256);
+    std::string CurHouseStr = str;
+    g_ini.Trim(CurHouseStr);
+
+    std::unordered_map&lt;std::string, bool&gt; Houses;
+    for (register int i = 0; i &lt; HouseCount; ++i) {
+        SendMessage(ComboBox, CB_SETCURSEL, i, NULL);
+        GetWindowText(ComboBox, str, 256);
+        std::string key = str;
+        Houses[key] = false;
+    }
+    SendMessage(ComboBox, CB_SETCURSEL, HouseCount &gt;= 0 ? CurHouseIndex : -1, NULL);
+    TCHAR AllieStr[1024];
+    GetWindowText(Edit, AllieStr, 1024);
+    std::string AlliedText = AllieStr;
+
+    std::vector&lt;std::string&gt; AllieStrs = g_ini.Split(AllieStr, ',');
+    for (register int i = 0, cnt = AllieStrs.size(); i &lt; cnt; ++i) {
+        g_ini.Trim(AllieStrs[i]);
+        if (Houses.find(AllieStrs[i]) != Houses.end()) //House Exists
+            Houses[AllieStrs[i]] = true;
+    }
+				
+    std::pair&lt;std::unordered_map&lt;std::string, bool&gt;*, std::pair&lt;std::string*, std::string*&gt;*&gt; Param;
+    std::pair&lt;std::string*, std::string*&gt; StringParam = std::make_pair(&amp;AlliedText, &amp;CurHouseStr);
+				
+    Param.first = &amp;Houses;
+    Param.second = &amp;StringParam;
+
+    DialogBoxParam(g_hModule, MAKEINTRESOURCE(IDD_DIALOG1), HouseWnd, HouseDlgProc, (LPARAM)&amp;Param);
+				
+    SetWindowText(Edit, AlliedText.c_str());
+
+    break;
+}
+...
+</code></pre>
+<pre><code class="language-cpp">BOOL CALLBACK HouseDlgProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (Msg)
+	{
+        case WM_INITDIALOG:{
+            std::unordered_map&lt;std::string, bool&gt;* Houses = 
+                ((std::pair&lt;std::unordered_map&lt;std::string, bool&gt;*, std::pair&lt;std::string*, std::string*&gt;*&gt;*)lParam)-&gt;first;
+            std::pair&lt;std::string*, std::string*&gt;* StringParam =
+                ((std::pair&lt;std::unordered_map&lt;std::string, bool&gt;*, std::pair&lt;std::string*, std::string*&gt;*&gt;*)lParam)-&gt;second;
+
+            HWND LBA, LBB, EDIT, EDIT2;
+            LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+            LBB = GetDlgItem(hwnd, IDC_LIST3);//Enemy ListBox
+            EDIT = GetDlgItem(hwnd, IDC_EDIT1);//Edit
+            EDIT2 = GetDlgItem(hwnd, IDC_EDIT2);//String Address
+            for (auto x : (*Houses)) {
+                std::string str = x.first;
+                if (x.second)
+                    SendMessage(LBA, LB_ADDSTRING, NULL, (LPARAM)str.c_str());
+                else
+                    SendMessage(LBB, LB_ADDSTRING, NULL, (LPARAM)str.c_str());
+            }
+
+            SetWindowText(EDIT2, std::to_string((int)(StringParam-&gt;first)).c_str());
+            std::string &amp;EditShowStr = *(StringParam-&gt;second);
+            g_logger.Info(&quot;Now processing house &quot; + EditShowStr);
+            SetWindowText(EDIT, EditShowStr.c_str());
+            g_logger.Info(&quot;Successfully done initialization of allie editor dialog box.&quot;);
+            return TRUE;
+        }
+        case WM_COMMAND:{
+            switch (wParam)
+            {
+                case IDOK:{
+                    g_logger.Info(&quot;Allie editor confirmed.&quot;);
+                    HWND LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+                    HWND EDIT2 = GetDlgItem(hwnd, IDC_EDIT2);//Allies ListBox
+                    TCHAR str[256];
+                    GetWindowText(EDIT2, str, 11);
+                    std::string* retStr = (std::string*)(atoi(str));
+                    retStr-&gt;clear();
+                    int AllieCount = SendMessage(LBA, LB_GETCOUNT, NULL, NULL);
+                    for (register int i = 0; i &lt; AllieCount - 1; ++i) {
+                        int TextLen = SendMessage(LBA, LB_GETTEXTLEN, i, NULL);
+                        if (TextLen == LB_ERR)	break;
+                        TCHAR* str = new TCHAR[TextLen + 1];
+                        SendMessage(LBA, LB_GETTEXT, i, (LPARAM)str);
+                        (*retStr) += ((std::string)str + ',');
+                    }
+                    int TextLen = SendMessage(LBA, LB_GETTEXTLEN, AllieCount - 1, NULL);
+                    if (TextLen == LB_ERR)	break;
+                    TCHAR* _str = new TCHAR[TextLen + 1];
+                    SendMessage(LBA, LB_GETTEXT, AllieCount - 1, (LPARAM)_str);
+                    (*retStr) += (std::string)_str;
+                    EndDialog(hwnd, NULL);
+                    return TRUE;
+                }
+                case IDCANCEL: {
+                    g_logger.Info(&quot;Allie editor cancelled.&quot;);
+                    EndDialog(hwnd, NULL);
+                    return TRUE;
+                }
+                case IDC_BUTTON1: {//Go Allies
+                    HWND LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+                    HWND LBB = GetDlgItem(hwnd, IDC_LIST3);//Enemy ListBox
+                    int EnemyCount = SendMessage(LBB, LB_GETCOUNT, NULL, NULL);
+                    if (EnemyCount &lt;= 0)	break;
+                    int EnemyCurSelIndex = SendMessage(LBB, LB_GETCURSEL, NULL, NULL);
+                    if (EnemyCurSelIndex &lt; 0 || EnemyCurSelIndex &gt;= EnemyCount)	break;
+                    int TextLen = SendMessage(LBB, LB_GETTEXTLEN, EnemyCurSelIndex, NULL);
+                    if (TextLen == LB_ERR)	break;
+                    TCHAR* str = new TCHAR[TextLen + 1];
+                    SendMessage(LBB, LB_GETTEXT, EnemyCurSelIndex, (LPARAM)str);
+                    SendMessage(LBB, LB_DELETESTRING, EnemyCurSelIndex, NULL);
+                    SendMessage(LBA, LB_ADDSTRING, NULL, (LPARAM)str);
+                    break;
+                }
+                case IDC_BUTTON2: {//Go Enemies
+                    HWND LBA = GetDlgItem(hwnd, IDC_LIST2);//Allies ListBox
+                    HWND LBB = GetDlgItem(hwnd, IDC_LIST3);//Enemy ListBox
+                    int AllieCount = SendMessage(LBA, LB_GETCOUNT, NULL, NULL);
+                    if (AllieCount &lt;= 0)	break;
+                    int AllieCurSelIndex = SendMessage(LBA, LB_GETCURSEL, NULL, NULL);
+                    if (AllieCurSelIndex &lt; 0 || AllieCurSelIndex &gt;= AllieCount)	break;
+                    int TextLen = SendMessage(LBA, LB_GETTEXTLEN, AllieCurSelIndex, NULL);
+                    if (TextLen == LB_ERR)	break;
+                    TCHAR* str = new TCHAR[TextLen + 1];
+                    SendMessage(LBA, LB_GETTEXT, AllieCurSelIndex, (LPARAM)str);
+                    SendMessage(LBA, LB_DELETESTRING, AllieCurSelIndex, NULL);
+                    SendMessage(LBB, LB_ADDSTRING, NULL, (LPARAM)str);
+                    break;
+                }
+                default:
+                    break; 
+            }
+            break;
+        }
+
+        case WM_CLOSE:{
+            EndDialog(hwnd, NULL);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://secsome.github.io/post/00010/" class="post-title gt-a-link">
+                    [数学] 构造
+                </a>
+            </div>
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '87d91f5cadc67975932b',
+    clientSecret: '8e6e9b6568720ebf5d7f507d8046dcefba8b8c81',
+    repo: 'secsome.github.io',
+    owner: 'secsome',
+    admin: ['secsome'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">今天你咕了吗？</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <a href="https://space.bilibili.com/143748001" target="_blank">我的B站空间</a> | <a href="https://secsome.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+
+    </div>
+</div>
+</body>
+</html>
